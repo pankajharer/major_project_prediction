@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template,jsonify
 import joblib
 from sklearn.preprocessing import MinMaxScaler
 
@@ -20,7 +20,8 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    float_features = [float(x) for x in request.form.values()]
+    data = request.get_json(force=True)
+    float_features = [float(x) for x in data['features']]    
     final_features = [np.array(float_features)]
     
     prediction = model.predict(sc.transform(final_features))
@@ -31,7 +32,6 @@ def predict():
         pred = "You don't have Diabetes."
     output = pred
 
-    return render_template('index.html', prediction_text='{}'.format(output))
-
+    return jsonify({'prediction': output})
 if __name__ == "__main__":
     app.run(debug=True)
